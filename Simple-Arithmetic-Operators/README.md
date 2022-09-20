@@ -2,9 +2,9 @@
 
 Here is a simple contract that you can add, subtract, multiple and modulo any postive integer value within 256bit.
 
-+ => addition
+( + ) => addition
 
-- => subtraction
+( - ) => subtraction
 
 / => division
 

@@ -1,17 +1,39 @@
-# Cypto kid
+# CryptoKid
+CryptoKid is a smart contract that manages funds for children's education. The contract allows parents to deposit funds into a child's account and allows children to withdraw the funds once they reach the age of majority.
 
-CrytoKid is a kind of will-statement contract. Think of it as a contract wherein a parent agrees to set aside funds in an account for each of their children as soon as the kid is born, and the child will be permitted access to the funds after the child reaches the age of 16.
+## Functions
+###  addKid(address _walletAddress, string _firstName, string _lastName)
+This function adds a new child to the contract and sets their wallet address, first name, and last name. It also sets the date at which the child will be able to withdraw their funds.
 
-The code is a Solidity smart contract for a cryptocurrency education savings account for children. The contract has a CyptoKid struct that stores information about a child, including their wallet address, first and last name, release date, amount, and a boolean indicating whether the funds have been withdrawn.
+### deposit(address _walletAddress)
+This function allows parents to deposit funds into a child's account.
 
-The contract has a constructor that sets the owner of the contract to the contract creator. There are two modifiers that check the validity of a wallet address and whether the caller is the contract owner, respectively.
+### balance()
+This function returns the balance of the caller's account.
 
-The addKid function allows the contract owner to add a new child to the contract. It requires a valid wallet address, and checks that the wallet address is not the owner's address and that it is not already in the kids array. It also checks that the child's first and last names are not empty by computing their keccak256 hash and comparing it to the hash of an empty string. If all checks pass, it adds the child to the kids array.
+### availableToWithdraw(address _walletAddress)
+This function returns true if the child associated with the provided wallet address is able to withdraw their funds, and false otherwise.
 
-The deposit function allows anyone to deposit funds into a child's account. It requires a valid wallet address, and checks that the wallet address is not the owner's address and that it is in the kids array. It also checks that the value being deposited is greater than 0. If all checks pass, it updates the child's balance and emits a Deposit event.
+### withdraw(address _walletAddress)
+This function allows a child to withdraw their funds once they are able to do so.
 
-The balance function returns the balance of the account associated with the caller's wallet address.
+### transferOwnership(address _newOwner)
+This function allows the owner of the contract to transfer ownership to another address.
 
-The availabeToWithdraw function checks if a child is able to withdraw their funds by comparing the current block timestamp to the child's release date.
+### renounceOwnership()
+This function allows the owner of the contract to renounce their ownership of the contract.
 
-The withdraw function allows the child associated with the provided wallet address to withdraw their funds if they are available to withdraw, the balance is greater than 0, and the funds have not been withdrawn before. If all checks pass, it transfers the funds to the child's wallet, updates the withdrawn flag, and emits a Withdrawal event.
+## Events
+The CyptoKid contract includes several events that can be used to track important information about the contract.
+
+### Deposit
+The Deposit event is triggered whenever funds are deposited into a child's education account. It includes the following parameters:
+- sender: The address of the user that made the deposit
+- amount: The amount of the deposit
+- time: The timestamp of the block in which the deposit was made
+
+### Withdrawal
+The Withdrawal event is triggered whenever a child withdraws funds from their education account. It includes the following parameters:
+- receiver: The address of the child that withdrew the funds
+- amount: The amount of the withdrawal
+- time: The timestamp of the block in which the withdrawal was made

@@ -1,11 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0
-
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
 contract WillStatement{
-    address owner;
-    uint assets;
-    bool decreased;
+    address public owner;
+    uint public  assets;
+    bool public decreased;
 
     constructor() payable {
         owner = msg.sender;
@@ -17,17 +16,16 @@ contract WillStatement{
         require(msg.sender == owner);
         _;
     }
-
     modifier mustBeDecreased(){
         require(decreased == true);
         _;
     }
 
     address payable[] familyWallet;
-
     mapping(address => uint) inheritance;
 
     function setInheritance(address payable wallet, uint amount) public onlyOwner {
+        require(amount <= assets, "Amount cannot be greater than total assets");
         inheritance[wallet] = amount;
         familyWallet.push(wallet);
     }

@@ -1,1 +1,3 @@
 # Solidity-Smart-Contract
+
+As someone who is passionate about continuously learning and improving my skills, I recently completed some Solidity projects to train myself in the language." In the future, I plan to use this project as a foundation to build a user interface, which will allow me to further my understanding of Solidity and web development. "I am excited to continue learning and exploring new technologies, and I believe that projects like this will help me achieve my goals.

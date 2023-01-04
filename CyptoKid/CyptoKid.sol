@@ -18,7 +18,6 @@ contract CyptoKid {
         uint amount;
         bool withdrawn;
     }
-
     Kid[] public kids;
 
     constructor() {

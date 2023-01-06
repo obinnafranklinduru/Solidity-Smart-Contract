@@ -21,10 +21,6 @@ This is a Solidity implementation of a multi-signature wallet contract. It allow
 - Unpause: Emitted when the wallet is unpaused.
 - Recovery: Emitted when an owner recovers their funds to a new address.
 
-### Usage
-To use the contract, call the `constructor` function with an array of addresses for the initial wallet owners and an integer for the required number of confirmations.
-`constructor(address[] memory _owners, uint256 _numConfirmationsRequired)`
-
 ### Functions
 #### constructor(address[] memory _owners, uint256 _numConfirmationsRequired)
 The constructor is called when the contract is deployed and sets the initial list of owners and the number of confirmations required for a transaction to be executed.

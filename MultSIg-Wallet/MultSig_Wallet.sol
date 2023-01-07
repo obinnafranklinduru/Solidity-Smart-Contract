@@ -143,6 +143,7 @@ contract MultiSigWallet{
     onlyOwner 
     {
         uint txIndex = transactions.length;
+        require(msg.value > 0, "insufficient balance");
         
         transactions.push(
             Transaction({
@@ -164,6 +165,7 @@ contract MultiSigWallet{
      * Requirements
      *  The caller must be an owner of the wallet
      *  The transaction must not already have been confirmed by the caller
+     *  The transaction must not already have been executed.
      *  The transaction must exist
      *  The wallet must not be paused
      */
@@ -181,6 +183,16 @@ contract MultiSigWallet{
         emit ConfirmTransaction(msg.sender, _txIndex);
     }
 
+    /**
+     * executeTransaction: This function allows an owner to execute a confirmed transaction.
+     * @param _txIndex: The index of the transaction to confirm
+     * 
+     * Requirements
+     *  The caller must be an owner of the wallet
+     *  The transaction must not already have been executed
+     *  The transaction must exist
+     *  The wallet must not be paused
+     */
     function executeTransaction(uint _txIndex) 
     public 
     onlyOwner 
@@ -203,6 +215,20 @@ contract MultiSigWallet{
         emit ExecuteTransaction(msg.sender, _txIndex);
     }
 
+    /**
+     * revokeConfirmation: This function allows an owner to revoke 
+     *  their confirmation for a transaction. 
+     *  If a transaction does not have enough confirmations after one is revoked, 
+     *  it cannot be executed.
+     * 
+     * @param _txIndex: The index of the transaction to confirm
+     * 
+     * Requirements
+     *  The caller must be an owner of the wallet
+     *  The transaction must not already have been confirmed by the caller
+     *  The transaction must not already have been executed.
+     *  The transaction must exist
+     */
     function revokeConfirmation(uint _txIndex) 
     public 
     onlyOwner 
@@ -219,21 +245,23 @@ contract MultiSigWallet{
         emit RevokeConfirmation(msg.sender, _txIndex);
     }
 
+    // This function allows an owner to pause the wallet
     function pause() external onlyOwner {
         require(!paused, "Wallet is already paused");
         paused = true;
         emit Pause();
     }
 
+    // This function allows an owner to unpause the wallet
     function unpause() external onlyOwner {
         require(paused, "Wallet is not paused");
         paused = false;
         emit Unpause();
     }
-
+    // This function allows any owner to call it and withdraw the funds from the wallet
     function emergencyWithdrawal(address payable _to) external {
         require(isOwner[msg.sender], "Only an owner can perform an emergency withdrawal");
-        require(address(this).balance == 0, "Cannot perform emergency withdrawal unless the wallet is empty");
+        require(address(this).balance > 0, "Insufficient Balance");
 
         uint256 deadline = block.timestamp + 24 hours;
         require(block.timestamp < deadline, "Emergency withdrawal period has expired");
@@ -248,10 +276,16 @@ contract MultiSigWallet{
     }
 
     function changeOwner(address _oldOwner, address _newOwner) external onlyOwner {
+        // Check that the old owner is an existing owner of the wallet
         require(isOwner[_oldOwner], "Old owner is not an owner of the wallet");
+
+        // Check that the new owner is not an existing owner of the wallet
         require(!isOwner[_newOwner], "New owner is already an owner of the wallet");
+
+        // Check that the new owner is not the zero address
         require(_newOwner != address(0), "Invalid new owner address");
 
+        // Update the mapping to reflect the change in ownership
         isOwner[_oldOwner] = false;
         isOwner[_newOwner] = true;
 

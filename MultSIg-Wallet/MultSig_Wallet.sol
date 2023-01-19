@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 contract MultiSigWallet{
     event Deposit(address indexed sender, uint amount, uint balance);
+    event Transfer(address indexed sender, address indexed receiver, uint amount);
     event ConfirmTransaction(address indexed owner, uint indexed txIndex);
     event RevokeConfirmation(address indexed owner, uint indexed txIndex);
     event ExecuteTransaction(address indexed owner, uint indexed txIndex);
@@ -11,7 +12,7 @@ contract MultiSigWallet{
         uint indexed txIndex,
         address indexed to,
         uint value,
-        string data
+        bytes data
     );
     event SetNumConfirmationsRequired(uint indexed numConfirmationsRequired);
     event Pause();
@@ -25,12 +26,13 @@ contract MultiSigWallet{
     Transaction[] public transactions;
 
     uint256 public numConfirmationsRequired;
+    uint256 public emergencyWithdrawalTime;
     bool paused;
 
     struct Transaction {
         address payable to;
         uint value;
-        string data;
+        bytes data;
         bool executed;
         uint256 numConfirmations;
     }
@@ -91,10 +93,11 @@ contract MultiSigWallet{
      *  The new owner's address must not already be an owner of the wallet
      */
     function addOwner(address _account) external onlyOwner {
-        require(!isOwner[_account], "Address not unique");
+        require(!isOwner[_account], "Address already exist");
         require(_account != address(0), "Invalid Address");
         isOwner[_account] = true;
         owners.push(_account);
+        // numConfirmations is incremented when new members are added.
         numConfirmationsRequired++;
     }
 
@@ -111,7 +114,7 @@ contract MultiSigWallet{
     function removeOwner(address _account) external onlyOwner {
         bool findMember;
         uint256 indexedMember;
-        require(owners.length > 1, "Cannot remove the last owner of the wallet");
+        require(owners.length > 1, "Cannot remove all owner of the wallet");
         for(uint256 i = 0; i < owners.length; i++){
             if(_account == owners[i]){
                 findMember = true;
@@ -123,6 +126,7 @@ contract MultiSigWallet{
         isOwner[owners[indexedMember]] = false;
         owners[indexedMember] = owners[owners.length - 1];
         owners.pop();
+        // numConfirmations is decremented when new members are removed.
         numConfirmationsRequired--;
     }
 
@@ -136,13 +140,13 @@ contract MultiSigWallet{
      *  The caller must be an owner of the wallet
      *  The wallet must not be paused
      */
-    function submitTransaction(address payable _to, string memory _data) 
+    function submitTransaction(address payable _to, bytes memory _data) 
     payable 
     public
     whenNotPaused 
     onlyOwner 
     {
-        uint txIndex = transactions.length;
+        uint txIndex = (transactions.length - 1);
         require(msg.value > 0, "insufficient balance");
         
         transactions.push(
@@ -192,6 +196,7 @@ contract MultiSigWallet{
      *  The transaction must not already have been executed
      *  The transaction must exist
      *  The wallet must not be paused
+     *  The numConfirmations greater or equal to numConfirmationsRequired
      */
     function executeTransaction(uint _txIndex) 
     public 
@@ -209,10 +214,11 @@ contract MultiSigWallet{
 
         transaction.executed = true;
 
-        (bool success, ) = transaction.to.call{value: transaction.value}("");
+        (bool success, ) = transaction.to.call{value: transaction.value}(transaction.data);
         require(success, "tx failed");
 
         emit ExecuteTransaction(msg.sender, _txIndex);
+        emit Transfer(msg.sender, transaction.to, transaction.value);
     }
 
     /**
@@ -258,13 +264,22 @@ contract MultiSigWallet{
         paused = false;
         emit Unpause();
     }
-    // This function allows any owner to call it and withdraw the funds from the wallet
+
+    function setEmergencyWithdrawalTime() public onlyOwner {
+        emergencyWithdrawalTime = block.timestamp + 24 hours;
+    }
+
+    // The emergencyWithdrawal function in this smart contract allows an owner of the contract 
+    // to perform a withdrawal of all the funds stored in the contract in case of an emergency.
+
+    // The user has to setEmergencyWithdrawalTime which will automatically 
+    // add 24 hours to the current block.timestamp,
+    // then the owner has to wait for the time to elapse.
     function emergencyWithdrawal(address payable _to) external {
         require(isOwner[msg.sender], "Only an owner can perform an emergency withdrawal");
         require(address(this).balance > 0, "Insufficient Balance");
 
-        uint256 deadline = block.timestamp + 24 hours;
-        require(block.timestamp < deadline, "Emergency withdrawal period has expired");
+        require(block.timestamp >= emergencyWithdrawalTime, "Emergency withdrawal period has not started");
         _to.transfer(address(this).balance);
     }
 
@@ -320,7 +335,7 @@ contract MultiSigWallet{
         returns (
             address to,
             uint value,
-            string memory data,
+            bytes memory data,
             bool executed,
             uint256 numConfirmations
         )

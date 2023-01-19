@@ -1,5 +1,5 @@
 # Dutch Auction Smart Contract
-This smart contract is a Dutch auction contract, which allows the seller to auction off a non-fungible token (NFT) to the highest bidder. The contract uses a Dutch auction mechanism, where the price of the NFT starts high and gradually decreases over time until the auction is won or the auction expires.
+This smart contract is a Dutch auction contract, which allows the seller to auction off a non-fungible token (NFT) at a price is reduced until a buyer found. The contract uses a Dutch auction mechanism, where the price of the NFT starts high and gradually decreases over time until the auction is won or the auction expires.
 
 ## Features
 - The contract is designed to work with any ERC721 compliant NFT contract.

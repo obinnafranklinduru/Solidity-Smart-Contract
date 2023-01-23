@@ -56,4 +56,4 @@ This function allows an owner to unpause the wallet, allowing transactions to be
 This function allows an owner to change the owner of the contract to a new Ethereum account in the event that the old owner's account is compromised or lost.
 
 #### function emergencyWithdrawal(address payable _to)
-This function allows any owner to call it and withdraw the funds from the wallet, as long as the wallet is not empty. This can be useful in cases where the wallet becomes stranded or otherwise unable to function, as it allows the owners to recover their funds.
+This function allows only owners to call it and withdraw the funds from the wallet, as long as the wallet is not empty. This can be useful in cases where the wallet becomes stranded or otherwise unable to function, as it allows the owners to recover their funds.

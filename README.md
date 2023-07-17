@@ -18,7 +18,7 @@ By exploring the Solidity code in this repository, you can:
 
 ## How to Get Started
 
-1. **Explore the Code**: Browse through the repository to find Solidity code examples and projects that interest you. Take a closer look at the code, comments, and documentation to understand the implementation details and rationale behind each project.
+1. **Explore the Code**: Browse through the repository to find Solidity code and projects that interest you. Take a closer look at the code, comments, and documentation to understand the implementation details and rationale behind each project.
 
 2. **Learn Solidity**: Familiarize yourself with Solidity syntax, data types, control structures, and contract development principles. You can find Solidity learning resources, tutorials, and documentation online to supplement your understanding.
 

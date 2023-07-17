@@ -1,35 +1,64 @@
-# Wallet contract
-This contract allows an owner to deposit and withdraw ETH from a wallet. The contract also allows the owner to pause the contract, set a maximum transaction limit, and set a new owner.
+# Wallet Contract
+
+## Description
+
+The `Wallet` contract allows the owner to deposit and withdraw funds from the contract. The contract includes a withdrawal limit per transaction and the ability to pause or resume contract functionality.
+
+### Events
+
+- `Withdrawal(address receiver, uint256 amount, uint256 blockTime)`: Triggered when a withdrawal is made from the contract.
+- `Deposit(address sender, uint256 amount, uint256 blockTime)`: Triggered when a deposit is made to the contract.
+
+### Variables
+
+- `owner` (address payable): The address of the owner of the wallet.
+- `paused` (bool): Indicates whether the contract is paused or not.
+- `limitPerTransaction` (uint256): The maximum amount that can be withdrawn in a single transaction.
+
+### Modifiers
+
+- `onlyOwner()`: Ensures that the caller is the owner of the wallet.
+
+### Functions
+
+The `Wallet` contract provides the following functions:
+
+#### `constructor() payable`
+
+Initializes the contract by setting the deployer's address as the owner.
+
+#### `deposit() payable external onlyOwner`
+
+Allows the owner to deposit funds into the contract.
+
+#### `withdraw(uint256 _amount) payable external onlyOwner`
+
+Allows the owner to withdraw funds from the contract.
+
+#### `addNewOwner(address payable _newOwner) external onlyOwner`
+
+Allows the owner to add a new owner to the wallet.
+
+#### `togglePaused() external onlyOwner`
+
+Allows the owner to pause or resume the contract.
+
+#### `getBalance() external view returns(uint256 balance)`
+
+Returns the balance of the contract.
+
+#### `getLimitPerTransaction() external view returns(uint256 limit)`
+
+Returns the withdrawal limit per transaction.
+
+#### `receive() payable external`
+
+Fallback function to receive funds.
+
+#### `fallback() payable external`
+
+Fallback function to receive funds.
 
 ## License
-This contract is licensed under the MIT license.
 
-## Variables
-- owner: The owner of the contract.
-- paused: A boolean value indicating whether the contract is paused or not.
-- limitPerTransaction: The maximum amount that can be withdrawn in a single transaction.
-Events
-- Deposit: Emitted when ETH is deposited into the contract.
-- Withdrawal: Emitted when ETH is withdrawn from the contract.
-
-## Functions
-### Constructor
-The constructor sets the owner of the contract to the caller.
-
-### deposit
-The deposit function allows the owner to deposit ETH into the contract.
-
-### withdraw
-The withdraw function allows the owner to withdraw ETH from the contract. The amount withdrawn must be less than or equal to the limitPerTransaction variable and the contract's balance.
-
-### addNewOwner
-The addNewOwner function allows the owner to set a new owner for the contract.
-
-### togglePaused
-The togglePaused function allows the owner to pause or unpause the contract.
-
-### getBalance
-The getBalance function allows the owner to view the current balance of the contract.
-
-### getLimitPerTransaction
-The getLimitPerTransaction function allows the owner to view the current transaction limit for the contract.
+This code is licensed under the MIT License.

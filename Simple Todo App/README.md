@@ -1,43 +1,65 @@
-# Overview
-The SimpleTodoApp contract is a simple todo list application that allows a user to create, update, and delete todos. The user can also toggle the completion status of a todo, and delete all todos in the list.
+# SimpleTodoApp Contract
 
-## The contract includes the following functions:
+## Description
 
-### create(string calldata _text)
-This function allows the user to create a new todo with the specified _text. The todo will be added to the end of the list and will have a completion status of false.
+The `SimpleTodoApp` contract allows a single user to create, update, and delete to-do items. Each to-do item consists of a text description and a completion status.
 
-### updateText(uint _index, string calldata _text)
-This function allows the user to update the text of a todo at the specified _index with the new _text.
+### Events
 
-### get(uint _index)
-This function returns the text and completion status of the todo at the specified _index.
+- `TodoCreated(string text)`: Triggered when a new to-do item is created.
+- `TodoUpdated(uint index, string text)`: Triggered when an existing to-do item is updated.
+- `TodoDeleted(uint index)`: Triggered when a to-do item is deleted.
+- `AllTodosDeleted()`: Triggered when all to-do items are deleted.
 
-### toggleCompleted(uint _index)
-This function toggles the completion status of the todo at the specified _index. If the todo is completed, it will be set to incomplete. If the todo is incomplete, it will be set to complete.
+### Variables
 
-### deleteTodo(uint _index)
-This function deletes the todo at the specified _index.
+- `user` (address): The address of the user who owns the to-do list.
 
-### deleteAllTodos()
-This function deletes all todos in the list.
+### Modifiers
 
-### lengthOfTodo()
-This function returns the number of todos in the list.
+- `validUser()`: Ensures that the caller is the user who owns the to-do list.
+- `OutOfBound(uint _index)`: Ensures that the provided index is within the range of the existing to-do items.
 
-## Events
-The SimpleTodoApp contract includes the following events:
+### Struct
 
-### TodoCreated(string text)
-This event is emitted when a todo is created with the specified text.
+- `Todo`: Represents a to-do item with a text description and completion status.
 
-### TodoUpdated(uint index, string text)
-This event is emitted when the text of a todo at the specified index is updated with the new text.
+### Functions
 
-### TodoDeleted(uint index)
-This event is emitted when a todo at the specified index is deleted.
+The `SimpleTodoApp` contract provides the following functions:
 
-### AllTodosDeleted()
-This event is emitted when all todos in the list are deleted.
+#### `constructor()`
 
-### Restrictions
-Only the user who deployed the contract can access its functions. Any other address that tries to call a function will receive an error.
+Initializes the contract by setting the deployer's address as the user.
+
+#### `create(string calldata _text) external validUser`
+
+Creates a new to-do item with the given text.
+
+#### `updateText(uint _index, string calldata _text) external validUser OutOfBound(_index)`
+
+Updates the text of an existing to-do item at the specified index.
+
+#### `get(uint _index) external view OutOfBound(_index) returns(string memory, bool)`
+
+Retrieves the text and completion status of a to-do item at the specified index.
+
+#### `toggleCompleted(uint _index) external validUser OutOfBound(_index)`
+
+Toggles the completion status of a to-do item at the specified index.
+
+#### `deleteTodo(uint _index) external validUser OutOfBound(_index)`
+
+Deletes a to-do item at the specified index.
+
+#### `deleteAllTodos() external validUser`
+
+Deletes all to-do items.
+
+#### `lengthOfTodo() external view returns(uint)`
+
+Returns the number of to-do items in the list.
+
+## License
+
+This code is licensed under the GPL-3.0 License.

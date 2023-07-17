@@ -1,39 +1,89 @@
-# CryptoKid
-CryptoKid is a smart contract that manages funds for children's education. The contract allows parents to deposit funds into a child's account and allows children to withdraw the funds once they reach the age of majority.
+# CyptoKid Contract
 
-## Functions
-###  addKid(address _walletAddress, string _firstName, string _lastName)
-This function adds a new child to the contract and sets their wallet address, first name, and last name. It also sets the date at which the child will be able to withdraw their funds.
+## Description
 
-### deposit(address _walletAddress)
-This function allows parents to deposit funds into a child's account.
+The `CyptoKid` contract allows the creation of accounts for children's education savings. The contract owner can add kids' accounts, deposit funds into the accounts, and allow the kids to withdraw funds after a specific release date. Each kid account is associated with an address, first name, last name, release date, and amount.
 
-### balance()
-This function returns the balance of the caller's account.
+### Events
 
-### availableToWithdraw(address _walletAddress)
-This function returns true if the child associated with the provided wallet address is able to withdraw their funds, and false otherwise.
+The following events are emitted by the contract:
 
-### withdraw(address _walletAddress)
-This function allows a child to withdraw their funds once they are able to do so.
+- `Deposit(address sender, uint amount, uint time)`: Triggered when funds are deposited into a kid's account.
+- `Withdrawal(address receiver, uint amount, uint time)`: Triggered when funds are withdrawn from a kid's account.
 
-### transferOwnership(address _newOwner)
-This function allows the owner of the contract to transfer ownership to another address.
+### Contract Variables
 
-### renounceOwnership()
-This function allows the owner of the contract to renounce their ownership of the contract.
+- `owner` (address): The address of the contract owner.
+- `kids` (array of Kid): An array that stores information about each kid account.
 
-## Events
-The CyptoKid contract includes several events that can be used to track important information about the contract.
+### Structs
 
-### Deposit
-The Deposit event is triggered whenever funds are deposited into a child's education account. It includes the following parameters:
-- sender: The address of the user that made the deposit
-- amount: The amount of the deposit
-- time: The timestamp of the block in which the deposit was made
+- `Kid`: Stores information about a kid's account, including the wallet address, first name, last name, release date, amount, and withdrawal status.
 
-### Withdrawal
-The Withdrawal event is triggered whenever a child withdraws funds from their education account. It includes the following parameters:
-- receiver: The address of the child that withdrew the funds
-- amount: The amount of the withdrawal
-- time: The timestamp of the block in which the withdrawal was made
+### Constructor
+
+The constructor sets the contract owner to the address of the deployer.
+
+### Modifiers
+
+- `onlyOwner`: Ensures that only the contract owner can execute the function.
+- `validAddress`: Checks if the provided address is valid (not the zero address).
+
+### Functions
+
+The `CyptoKid` contract provides the following functions:
+
+#### `addKid(address payable _walletAddress, string memory _firstName, string memory _lastName) → public onlyOwner validAddress(_walletAddress)`
+
+Adds a new kid's account to the contract.
+
+##### Parameters
+
+- `_walletAddress` (address payable): The wallet address associated with the kid's account.
+- `_firstName` (string): The first name of the kid.
+- `_lastName` (string): The last name of the kid.
+
+#### `deposit(address _walletAddress) → payable public validAddress(_walletAddress)`
+
+Deposits funds into a kid's account.
+
+##### Parameters
+
+- `_walletAddress` (address): The wallet address associated with the kid's account.
+
+#### `balance() → public view returns (uint)`
+
+Returns the current balance of the caller's kid account.
+
+#### `availableToWithdraw(address _walletAddress) → view public returns (bool)`
+
+Checks if a kid's account is eligible for fund withdrawal based on the release date.
+
+##### Parameters
+
+- `_walletAddress` (address): The wallet address associated with the kid's account.
+
+##### Returns
+
+- `bool`: `true` if the kid's account is eligible for withdrawal, `false` otherwise.
+
+#### `withdraw(address payable _walletAddress) → public payable validAddress(_walletAddress)`
+
+Withdraws funds from a kid's account.
+
+##### Parameters
+
+- `_walletAddress` (address payable): The wallet address associated with the kid's account.
+
+## Usage
+
+1. Deploy the `CyptoKid` contract.
+2. Call the `addKid` function to create a new kid's account, providing the kid's wallet address, first name, and last name.
+3. Deposit funds into a kid's account using the `deposit` function, specifying the kid's wallet address.
+4. Check the balance of a kid's account using the `balance` function.
+5. Verify if a kid's account is eligible for withdrawal using the `availableToWithdraw` function.
+6. Withdraw funds from a kid's account using the `withdraw` function, providing the kid's wallet address.
+
+## License
+
+This code is licensed under the MIT License.

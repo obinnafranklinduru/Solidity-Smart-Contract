@@ -1,36 +1,92 @@
-# ERC20
-This contract is an implementation of the ERC20 token standard. It allows users to transfer and manage their tokens, and provides functions for approving and transferring tokens on behalf of other users.
+# ERC20 Contract
 
-## Constructor(string memory _name, string memory _symbol)
-This function is the constructor for the ERC20 contract. It is called when the contract is deployed and allows the contract owner to set the name and symbol properties of the token. The _name parameter represents the name of the token, and the _symbol parameter represents the symbol of the token.
+## Description
 
-The name and symbol properties are important because they allow users to identify the token and distinguish it from other tokens. They are typically displayed in wallets and exchanges, and are used to reference the token in transactions and other interactions.
+The `ERC20` contract implements the ERC20 token standard. It allows for the creation and management of ERC20-compliant tokens. The contract keeps track of token balances for each address, allows token transfers between addresses, and provides functions for token approval and allowance.
 
-By providing the name and symbol as arguments to the constructor, the contract owner can customize these properties to match the desired branding and identity of the token.
+### Contract Variables
 
-## Properties
-- totalSupply: The total number of tokens in circulation.
-- decimals: The number of decimal places that the tokens have.
-- name: The name of the token.
-- symbol: The symbol of the token.
-- balanceOf: A mapping from addresses to token balances.
-- allowance: A mapping from addresses to mappings of approved token amounts that other users are allowed to transfer on behalf of the owner.
-## Functions
-### transfer(address _to, uint256 _value)
-This function allows a user to transfer _value tokens to _to. It reduces the sender's balance by _value and increases the recipient's balance by _value.
+- `totalSupply` (uint256): The total supply of tokens.
+- `decimals` (uint256): The number of decimal places for token values.
+- `name` (string): The name of the token.
+- `symbol` (string): The symbol of the token.
+- `balanceOf` (mapping(address => uint256)): A mapping of token balances for each address.
+- `allowance` (mapping(address => mapping(address => uint256))): A mapping of approved allowances for each address.
 
-### transferFrom(address _from, address _to, uint256 _value)
-This function allows a user to transfer _value tokens from _from to _to on behalf of the owner of _from. It reduces the owner's balance by _value, reduces the allowance of the caller for _from by _value, and increases the recipient's balance by _value.
+### Constructor
 
-### approve(address _spender, uint256 _value)
-This function allows the owner of a token balance to approve _value tokens to be transferred by _spender. It increases the allowance of _spender for the owner by _value.
+The constructor initializes the token by setting the name and symbol.
 
-### mint(uint256 _value)
-This function allows the contract owner to mint new tokens and add them to their own balance. It increases the totalSupply by _value and the contract owner's balance by _value.
+#### Parameters
 
-### burn(uint256 _value)
-This function allows the contract owner to burn their own tokens and reduce the totalSupply. It reduces the contract owner's balance by _value and the totalSupply by _value.
+- `_name` (string): The name of the token.
+- `_symbol` (string): The symbol of the token.
+
+### Functions
+
+The `ERC20` contract provides the following functions:
+
+#### `transfer(address _to, uint256 _value) → external returns (bool success)`
+
+Transfers a specified amount of tokens from the sender's address to the recipient's address.
+
+#### `transferFrom(address _from, address _to, uint256 _value) → external returns (bool success)`
+
+Transfers a specified amount of tokens from the owner's address to another address if approved by the owner.
+
+#### `approve(address _spender, uint256 _value) → external returns (bool success)`
+
+Approves a specified address to spend a specified amount of tokens on behalf of the owner.
+
+#### `mint(uint256 _value) → external`
+
+Mints new tokens and adds them to the balance of the sender.
+
+#### `burn(uint256 _value) → external`
+
+Burns a specified amount of tokens from the sender's balance.
+
+# IERC20 Interface
+
+## Description
+
+The `IERC20` interface defines the standard functions and events for an ERC20-compliant token.
+
+### Functions
+
+The `IERC20` interface defines the following functions:
+
+#### `totalSupply() → external view returns (uint256)`
+
+Returns the total supply of tokens.
+
+#### `balanceOf(address _owner) → external view returns (uint256 balance)`
+
+Returns the token balance of a specified address.
+
+#### `transfer(address _to, uint256 _value) → external returns (bool success)`
+
+Transfers a specified amount of tokens from the sender's address to the recipient's address.
+
+#### `transferFrom(address _from, address _to, uint256 _value) → external returns (bool success)`
+
+Transfers a specified amount of tokens from the owner's address to another address if approved by the owner.
+
+#### `approve(address _spender, uint256 _value) → external returns (bool success)`
+
+Approves a specified address to spend a specified amount of tokens on behalf of the owner.
+
+#### `allowance(address _owner, address _spender) → external view returns (uint256 remaining)`
+
+Returns the remaining allowance of tokens that a spender is allowed to spend on behalf of an owner.
 
 ### Events
-- Transfer: Emitted when tokens are transferred from one address to another.
-- Approval: Emitted when an approval for transferring tokens on behalf of the owner is granted or changed.
+
+The `IERC20` interface defines the following events:
+
+- `Transfer(address indexed _from, address indexed _to, uint256 _value)`: Triggered when tokens are transferred from one address to another.
+- `Approval(address indexed _owner, address indexed _spender, uint256 _value)`: Triggered when the allowance of a spender is approved by the owner.
+
+## License
+
+This code is licensed under the MIT License.

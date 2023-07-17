@@ -1,32 +1,38 @@
-# Ownable contract
-The Ownable contract is a base contract that allows a contract to have an owner. It includes functions for transferring and renouncing ownership, as well as an onlyOwner modifier that can be used to restrict access to certain functions to the contract owner.
+# Ownable Contract
 
-## Functions
-### constructor
-The constructor is called when the contract is deployed and sets the contract owner to the address of the deploying user.
+## Description
 
-### transferOwnership
-The transferOwnership function allows the contract owner to transfer ownership of the contract to another address. It requires that the new owner is not the zero address or the contract itself, and that the caller is not transferring ownership to themselves.
+The `Ownable` contract provides basic ownership functionality, allowing a contract to have an owner and transferring ownership to another address.
 
-### renounceOwnership
-The renounceOwnership function allows the contract owner to renounce their ownership of the contract. It requires that the caller is the current owner of the contract.
+### Events
 
-## Events
-### OwnershipTransferred
-The OwnershipTransferred event is emitted when ownership of the contract is transferred to a new owner. It includes the previous owner and the new owner as indexed parameters.
+- `OwnershipTransferred(address indexed previousOwner, address indexed newOwner)`: Triggered when ownership is transferred to a new address.
+- `OwnershipRenounced(address indexed previousOwner)`: Triggered when ownership is renounced.
 
-### OwnershipRenounced
-The OwnershipRenounced event is emitted when the contract owner renounces their ownership of the contract. It includes the previous owner as an indexed parameter.
+### Variables
 
-## Modifiers
-### onlyOwner
-The onlyOwner modifier is applied to functions to restrict access to only the contract owner. If the caller is not the contract owner, the transaction will be reverted.
+- `owner` (address): The address of the contract owner.
 
-## Here's a brief summary of what the Ownable contract does:
+### Modifiers
 
-- It has an owner variable that stores the address of the current owner of the contract.
-- It has an OwnershipTransferred event that is emitted whenever ownership of the contract is transferred from one address to another.
-- It has an OwnershipRenounced event that is emitted whenever the current owner renounces their ownership of the contract.
-- It has an onlyOwner modifier that can be applied to functions to ensure that only the current owner can call those functions.
-- It has a transferOwnership function that allows the current owner to transfer ownership of the contract to a new address. This function includes require statements to ensure that the new owner is not the zero address, the contract itself, or the current owner.
-- It has a renounceOwnership function that allows the current owner to renounce their ownership of the contract. This function includes a require statement to ensure that only the current owner can renounce their ownership.
+- `onlyOwner()`: Ensures that the caller is the owner of the contract.
+
+### Functions
+
+The `Ownable` contract provides the following functions:
+
+#### `constructor()`
+
+Initializes the contract by setting the deployer's address as the owner.
+
+#### `transferOwnership(address _newOwner) external onlyOwner`
+
+Transfers ownership of the contract to a new address.
+
+#### `renounceOwnership() external onlyOwner`
+
+Allows the current owner to renounce ownership of the contract.
+
+## License
+
+This code is licensed under the MIT License.

@@ -62,7 +62,9 @@ Allows the owner to withdraw all contract funds.
 - `OnlyOwner()` – Triggered if a non-owner tries to execute owner-only functions.
 - `InvalidRoomId()` – Triggered if an invalid room ID is provided.
 - `RoomAlreadyBooked()` – Triggered if the room is already booked.
+- `InsufficientPayment()` – Triggered if the payment is above the required amount.
 - `InsufficientPayment()` – Triggered if the payment is below the required amount.
+- `InsufficientFunds()` – Triggered if there is no balance for the owner to withraw.
 - `RoomNotBooked()` – Triggered if a cancellation is attempted on an unbooked room.
 - `NotYourBooking()` – Triggered if a user tries to cancel another person's booking.
 

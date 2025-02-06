@@ -7,31 +7,39 @@ pragma solidity ^0.8.26;
  */
 contract HotelBooking {
     struct Room {
-        uint256 id;
-        uint256 price;
         bool isBooked;
         address bookedBy;
+        uint96 bookedPrice;
+        uint256 bookingDeadline;
     }
 
     address public owner;
     uint256 public totalRooms;
-    mapping(uint256 => Room) public rooms;
+    uint256 public defaultPrice; // Default price for each room and can be updated by the Hotel owner
+    uint256 public totalReserved; // Tracks Ether reserved for potential refunds
+    uint256 public constant REFUND_PERIOD = 1 days; 
+
+    mapping(uint256 => Room) public rooms; // Track the room availability and status
+    mapping(uint256 => uint256) private roomPrices; // Track the price for each room
     mapping(address => uint256) public loyaltyPoints;
 
     error OnlyOwner();
-    error InvalidRoomId();
-    error RoomAlreadyBooked();
     error OverPayment();
-    error InsufficientPayment();
-    error InsufficientFunds();
     error RoomNotBooked();
+    error InvalidRoomId();
     error NotYourBooking();
+    error InvalidTotalRoom();
+    error RoomAlreadyBooked();
+    error InsufficientFunds();
+    error InsufficientPayment();
+    error BookingNotFinalized();
+    error BookingDeadlinePassed();
 
-    event RoomBooked(uint256 roomId, address bookedBy);
-    event BookingCancelled(uint256 roomId, address cancelledBy);
+    event RoomBooked(uint256 roomId, address bookedBy, uint256 price);
+    event BookingCancelled(uint256 roomId, address cancelledBy, uint256 refundAmount);
     event LoyaltyPointsEarned(address user, uint256 points);
 
-    /**
+     /**
      * @dev Ensures only the contract owner can call certain functions.
      */
     modifier onlyOwner() {
@@ -39,25 +47,35 @@ contract HotelBooking {
         _;
     }
     
-    /**
+     /**
      * @dev Ensures the room is available for booking.
      */
     modifier roomAvailable(uint256 _roomId) {
+        ///@notice if totalRooms == 100, valid _roomId is 0 to 99
         if (_roomId >= totalRooms) revert InvalidRoomId();
         if (rooms[_roomId].isBooked) revert RoomAlreadyBooked();
         _;
     }
-    
+
     /**
      * @dev Contract constructor to initialize hotel rooms.
      * @param _totalRooms Total number of rooms available in the hotel.
      */
     constructor(uint256 _totalRooms) {
+        if(_totalRooms == 0) revert InvalidTotalRoom();
         owner = msg.sender;
         totalRooms = _totalRooms;
-        for (uint256 i = 1; i < _totalRooms; i++) {
-            rooms[i] = Room(i, 1 ether, false, address(0)); // Default price 1 ETH
-        }
+        defaultPrice = 1 ether; // Default price 1 ETH
+    }
+
+    /**
+     * @dev Returns the current price of a room, considering custom pricing.
+     */
+    function getRoomPrice(uint256 _roomId) public view returns (uint256) {
+        ///@notice if totalRooms == 100, valid _roomId is 0 to 99
+        if (_roomId >= totalRooms) revert InvalidRoomId();
+        uint256 customPrice = roomPrices[_roomId];
+        return customPrice != 0 ? customPrice : defaultPrice;
     }
 
     /**
@@ -65,14 +83,25 @@ contract HotelBooking {
      * @param _roomId ID of the room to be booked.
      */
     function bookRoom(uint256 _roomId) external payable roomAvailable(_roomId) {
-        if (msg.value < rooms[_roomId].price) revert InsufficientPayment();
-        if (msg.value > rooms[_roomId].price) revert OverPayment();
+        uint256 price = getRoomPrice(_roomId);
+        if (msg.value != price) { 
+            if (msg.value < price) revert InsufficientPayment();
+            if (msg.value > price) revert OverPayment();
+        }
+
+        uint256 deadline = block.timestamp + REFUND_PERIOD;
         
-        rooms[_roomId].isBooked = true;
-        rooms[_roomId].bookedBy = msg.sender;
+        rooms[_roomId] = Room({
+            isBooked: true,
+            bookedBy: msg.sender,
+            bookedPrice: uint96(price),
+            bookingDeadline: deadline
+        });
+        
+        totalReserved += price;
         loyaltyPoints[msg.sender] += 10;
         
-        emit RoomBooked(_roomId, msg.sender);
+        emit RoomBooked(_roomId, msg.sender, price);
         emit LoyaltyPointsEarned(msg.sender, 10);
     }
 
@@ -81,14 +110,27 @@ contract HotelBooking {
      * @param _roomId ID of the room to be cancelled.
      */
     function cancelBooking(uint256 _roomId) external {
-        if (!rooms[_roomId].isBooked) revert RoomNotBooked();
-        if (rooms[_roomId].bookedBy != msg.sender) revert NotYourBooking();
+        Room storage room = rooms[_roomId];
+        if (!room.isBooked) revert RoomNotBooked();
+        if (room.bookedBy != msg.sender) revert NotYourBooking();
+        if (block.timestamp > room.bookingDeadline) revert BookingDeadlinePassed();
         
-        rooms[_roomId].isBooked = false;
-        rooms[_roomId].bookedBy = address(0);
-        payable(msg.sender).transfer(rooms[_roomId].price);
+        uint256 refundAmount = room.bookedPrice;
+        delete rooms[_roomId];
+        totalReserved -= refundAmount;
         
-        emit BookingCancelled(_roomId, msg.sender);
+        payable(msg.sender).transfer(refundAmount);
+        
+        emit BookingCancelled(_roomId, msg.sender, refundAmount);
+    }
+
+    function finalizeBooking(uint256 _roomId) external onlyOwner {
+        Room storage room = rooms[_roomId];
+        if (!room.isBooked) revert RoomNotBooked();
+        if (block.timestamp <= room.bookingDeadline) revert BookingNotFinalized();
+
+        totalReserved -= room.bookedPrice;
+        delete rooms[_roomId];
     }
     
     /**
@@ -97,14 +139,23 @@ contract HotelBooking {
      * @param _newPrice New price for the room.
      */
     function updateRoomPrice(uint256 _roomId, uint256 _newPrice) external onlyOwner {
-        rooms[_roomId].price = _newPrice;
+        roomPrices[_roomId] = _newPrice;
+    }
+
+    /**
+     * @dev Function for the owner to update the default price for all rooms.
+     * @param _newPrice New default price.
+     */
+    function updateDefaultPrice(uint256 _newPrice) external onlyOwner {
+        defaultPrice = _newPrice;
     }
     
     /**
-     * @dev Function for the owner to withdraw all funds from the contract.
+     * @dev Function for the owner to withdraw available funds from the contract.
      */
     function withdrawFunds() external onlyOwner {
-        if(address(this).balance == 0) revert InsufficientFunds();
-        payable(owner).transfer(address(this).balance);
+        uint256 available = address(this).balance - totalReserved;
+        if (available == 0) revert InsufficientFunds();
+        payable(owner).transfer(available); // Only withdraw non-reserved funds
     }
 }
